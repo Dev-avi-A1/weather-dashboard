@@ -1,113 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Weather Dashboard</title>
-    <meta
-      name="description"
-      content="A modern weather dashboard built with vanilla HTML, CSS, and JavaScript using the Open-Meteo API."
-    />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <div class="app-shell">
-      <header class="topbar">
-        <div>
-          <p class="eyebrow">Weather Overview</p>
-          <h1>Weather Dashboard</h1>
-        </div>
-        <button id="locationBtn" class="secondary-btn" type="button">
-          Use my location
-        </button>
-      </header>
-
-      <section class="search-panel">
-        <form id="searchForm" class="search-form">
-          <label class="sr-only" for="cityInput">Search city</label>
-          <input
-            id="cityInput"
-            type="text"
-            name="city"
-            placeholder="Search for a city..."
-            autocomplete="off"
-          />
-          <button type="submit">Search</button>
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#dfe8df">
+  <title>Weather Inspect — Local conditions, clearly</title>
+  <meta name="description" content="A calm, precise look at current conditions and the week ahead, powered by Open-Meteo.">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet"><link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="atmosphere" aria-hidden="true"></div>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Weather Inspect home"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>Weather Inspect</span></a>
+      <button id="locationBtn" class="location-btn" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s6-5.1 6-11a6 6 0 1 0-12 0c0 5.9 6 11 6 11Z"/><circle cx="12" cy="10" r="2"/></svg><span>Use my location</span></button>
+    </header>
+    <main>
+      <section class="intro" aria-labelledby="page-title">
+        <div><p class="eyebrow">Local conditions, clearly</p><h1 id="page-title">Read the sky<br>before you step out.</h1></div>
+        <form id="searchForm" class="search-form" role="search">
+          <label for="cityInput">Check another place</label>
+          <div class="search-control"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></svg><input id="cityInput" type="search" name="city" placeholder="City or town" autocomplete="off" required><button type="submit" aria-label="Search weather"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M14 7l5 5-5 5"/></svg></button></div>
+          <div id="savedCities" class="saved-cities" aria-label="Recent places"></div>
         </form>
-
-        <div id="savedCities" class="saved-cities" aria-live="polite"></div>
       </section>
-
-      <main class="dashboard">
-        <section id="currentWeather" class="weather-card current-card">
-          <div class="card-header">
-            <div>
-              <p class="card-label">Current weather</p>
-              <h2 id="locationName">Loading...</h2>
-            </div>
-            <span id="weatherIcon" class="weather-icon" aria-label="Weather condition">
-              ☀️
-            </span>
+      <div id="statusMessage" class="status-message" role="alert" hidden></div>
+      <section id="weatherDashboard" class="dashboard" aria-busy="true">
+        <article class="current-card panel">
+          <div class="current-main">
+            <div class="location-heading"><p class="section-kicker">Right now</p><h2 id="locationName">Finding the forecast…</h2><p id="updatedAt" class="updated-at">Connecting to local weather</p></div>
+            <div id="weatherIcon" class="weather-icon" aria-hidden="true"></div>
+            <div class="temperature-wrap"><span class="temperature" id="currentTemp">--</span><span class="degree">°</span></div>
+            <div class="summary"><strong id="currentSummary">Loading conditions</strong><span id="feelsLike">Feels like --°</span></div>
           </div>
-
-          <div class="temp-row">
-            <div class="temp" id="currentTemp">--°C</div>
-            <div class="summary"> 
-              <div id="currentSummary">Fetching weather...</div>
-              <div id="feelsLike">Feels like --°C</div>
-            </div>
-          </div>
-
-          <div class="detail-grid">
-            <div class="detail-item">
-              <span class="detail-label">Humidity</span>
-              <strong id="humidity">--%</strong>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Wind</span>
-              <strong id="windSpeed">-- km/h</strong>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Precipitation</span>
-              <strong id="precipitation">-- mm</strong>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Sunrise</span>
-              <strong id="sunrise">--:--</strong>
-            </div>
-          </div>
-        </section>
-
-        <section class="weather-card">
-          <div class="card-header">
-            <div>
-              <p class="card-label">Next 6 hours</p>
-              <h3>Hourly forecast</h3>
-            </div>
-          </div>
-          <div id="hourlyForecast" class="hourly-forecast"></div>
-        </section>
-
-        <section class="weather-card">
-          <div class="card-header">
-            <div>
-              <p class="card-label">Week outlook</p>
-              <h3>7-day forecast</h3>
-            </div>
-          </div>
-          <div id="dailyForecast" class="daily-forecast"></div>
-        </section>
-      </main>
-    </div>
-
-    <div id="toast" class="toast" role="status" aria-live="polite"></div>
-
-    <script src="script.js"></script>
-  </body>
+          <dl class="detail-grid"><div><dt>Humidity</dt><dd id="humidity">--%</dd></div><div><dt>Wind</dt><dd id="windSpeed">-- km/h</dd></div><div><dt>Rainfall</dt><dd id="precipitation">-- mm</dd></div><div><dt>Sunrise</dt><dd id="sunrise">--:--</dd></div></dl>
+        </article>
+        <article class="hourly-card panel"><div class="panel-heading"><div><p class="section-kicker">The next stretch</p><h3>Coming hours</h3></div><span class="timezone-note">Local time</span></div><div id="hourlyForecast" class="hourly-forecast" aria-label="Hourly forecast"></div></article>
+        <article class="daily-card panel"><div class="panel-heading"><div><p class="section-kicker">A wider view</p><h3>Seven-day outlook</h3></div></div><div id="dailyForecast" class="daily-forecast" aria-label="Daily forecast"></div></article>
+      </section>
+    </main>
+    <footer><span>Forecast data by Open-Meteo</span><span>Updated on demand</span></footer>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div><script src="script.js"></script>
+</body>
 </html>
